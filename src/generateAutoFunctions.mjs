@@ -22,11 +22,11 @@ async function generateFunction(file, fn) {
 
 	await fs.writeFile(
 		file, await autoGenerateWarningComment() + `
-import {createDefaultContext} from "@anio-jsbundler/runtime"
+import {createDefaultContextAsync} from "@anio-jsbundler/runtime"
 import ${fn.source.export_name} from ${JSON.stringify(source)}
 
 const ${fn.destination.export_name}_impl = ${fn.source.export_name}(
-	createDefaultContext()
+	await createDefaultContextAsync()
 )
 
 export default function ${fn.destination.export_name}(...args) {

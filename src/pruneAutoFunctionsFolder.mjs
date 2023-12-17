@@ -2,6 +2,8 @@ import fs from "node:fs/promises"
 import path from "node:path"
 
 export default async function(project, auto_generated_files) {
+	let pruned_files = 0
+
 	const auto_files = await fs.readdir(
 		path.resolve(project.root, "src", "auto")
 	)
@@ -22,5 +24,11 @@ export default async function(project, auto_generated_files) {
 		await fs.unlink(
 			path.resolve(project.root, "src", "auto", auto_file)
 		)
+
+		++pruned_files
+	}
+
+	if (pruned_files === 0) {
+		process.stderr.write(`src/auto is clean\n`)
 	}
 }

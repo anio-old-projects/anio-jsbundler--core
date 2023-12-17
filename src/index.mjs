@@ -57,3 +57,11 @@ export {
 export {
 	default as findBundledResources
 } from "./findBundledResources.mjs"
+
+export {
+	default as emitWarning
+} from "./emitWarning.mjs"
+
+export {
+	default as colorize
+} from "./colorize.mjs"

@@ -1,6 +1,10 @@
 import fs from "node:fs/promises"
 import path from "node:path"
-import isRegularDirectory from "./isRegularDirectory.mjs"
+
+import {
+	isRegularDirectory,
+	emitInfo
+} from "@anio-jsbundler/utilities"
 
 async function collectResources(root, dir, ret = null) {
 	if (ret === null) ret = []
@@ -35,7 +39,7 @@ export default async function(project) {
 	)
 
 	if (!(await isRegularDirectory(resources_path))) {
-		process.stderr.write(`Skipping bundle.resources (not found)\n`)
+		emitInfo(`Skipping bundle.resources (not found)`)
 
 		return {}
 	}

@@ -9,7 +9,7 @@ const __dirname = path.dirname(
 export default async function() {
 	const package_json = (
 		await fs.readFile(
-			path.join(__dirname, "..", "package.json")
+			path.join(__dirname, "..", "..", "package.json")
 		)
 	).toString()
 

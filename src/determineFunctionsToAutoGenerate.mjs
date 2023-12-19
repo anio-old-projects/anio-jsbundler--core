@@ -1,82 +1,49 @@
-import stripSuffix from "./stripSuffix.mjs"
-import convertFilePathToExportName from "./convertFilePathToExportName.mjs"
+import path from "node:path"
 
-function checkIfEntryExists(library_functions, entry) {
-	for (const library_function of library_functions) {
-		if (library_function.type !== entry.type) continue
+import {
+	isRegularFile,
+	emitInfo,
+	colorize
+} from "@anio-jsbundler/utilities"
 
-		if (library_function.export_name === entry.name) {
-			return true
+export default async function(project, library_functions) {
+	let autogenerate = []
+
+	const factories = library_functions.map(fn => {
+		return fn + "Factory"
+	})
+
+	for (const factory of factories) {
+		const factory_path = path.join(
+			project.root, "src", "export", factory
+		) + ".mjs"
+
+		if (!(await isRegularFile(factory_path))) {
+			emitInfo(
+				`Factory ${factory} does not exist, it will be created`, false
+			)
+
+			autogenerate.push(factory)
 		}
 	}
-
-	return false
-}
-
-function mapToAutogen(type, entry) {
-	return {
-		create: type,
-		source: {
-			export_name: entry.export_name,
-			path: entry.relative_path
-		},
-		destination: {
-			export_name: entry.autogen[`associated_${type}`],
-			path: convertFilePathToExportName(entry.autogen.virtual_path) + ".mjs",
-			virtual_path: entry.autogen.virtual_path
-		}
-	}
-}
-
-function determineFactoriesToGenerate(library_functions) {
-	let ret = []
 
 	for (const library_function of library_functions) {
-		// only consider functions
-		if (library_function.type !== "function") continue
+		const function_path = path.join(
+			project.root, "src", "export", library_function
+		) + ".mjs"
 
-		// does a factory for this function exist?
-		const auto_gen_factory = !checkIfEntryExists(
-			library_functions, {
-				type: "factory",
-				name: `${library_function.export_name}Factory`
-			}
-		)
+		if (!(await isRegularFile(function_path))) {
+			emitInfo(
+				`Function ${library_function} does not exist, it will be created`, false
+			)
 
-		if (auto_gen_factory) {
-			ret.push(mapToAutogen("factory", library_function))
+			autogenerate.push(library_function)
 		}
 	}
 
-	return ret
-}
-
-function determineFunctionsToGenerate(library_functions) {
-	let ret = []
-
-	for (const library_function of library_functions) {
-		// only consider factories
-		if (library_function.type !== "factory") continue
-
-		// does a function exist for this factory?
-		const auto_gen_function = !checkIfEntryExists(
-			library_functions, {
-				type: "function",
-				name:stripSuffix(library_function.export_name, "Factory")
-			}
-		)
-
-		if (auto_gen_function) {
-			ret.push(mapToAutogen("function", library_function))
-		}
+	if (autogenerate.length) {
+		emitInfo(``, false)
 	}
 
-	return ret
-}
-
-export default function(library_functions) {
-	const factories = determineFactoriesToGenerate(library_functions)
-	const functions = determineFunctionsToGenerate(library_functions)
-
-	return [...factories, ...functions]
+	return autogenerate
 }

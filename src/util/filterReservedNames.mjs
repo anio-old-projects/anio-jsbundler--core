@@ -3,10 +3,17 @@ import {
 	emitWarning
 } from "@anio-jsbundler/utilities"
 
-export default function(functions) {
-	const reserved = ["importWithContext", "dict"]
+export default function(library) {
+	const reserved = [
+		"importWithContext",
+		"importWithContextAsync",
+		"dict",
+		"getUsedDefaultContext"
+	]
 
-	return functions.filter(fn => {
+	return library.filter(entry => {
+		const fn = entry.canonical_name
+
 		if (reserved.includes(fn)) {
 			let msg = ``
 

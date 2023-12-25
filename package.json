@@ -5,6 +5,6 @@
     ".": "./src/index.mjs"
   },
   "dependencies": {
-    "@anio-jsbundler/utilities": "^0.0.2"
+    "@anio-jsbundler/utilities": "^0.3.1"
   }
 }

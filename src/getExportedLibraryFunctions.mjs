@@ -3,11 +3,11 @@ import path from "node:path"
 import getJavaScriptFilesRecursively from "./util/getJavaScriptFilesRecursively.mjs"
 import warnDuplicateFunction from "./util/warnDuplicateFunction.mjs"
 import filterReservedNames from "./util/filterReservedNames.mjs"
+import convertFilePathToExportName from "./util/convertFilePathToExportName.mjs"
 
 import {
 	stripSuffix,
-	emitInfo,
-	colorize
+	isRegularFile
 } from "@anio-jsbundler/utilities"
 
 export default async function(project) {
@@ -15,47 +15,58 @@ export default async function(project) {
 		path.resolve(project.root, "src", "export"), "."
 	)
 
-	let functions = []
-	let duplicate_functions = {}
+	let entries = [], index = {}
 
 	for (const javascript_file of javascript_files) {
-		if (javascript_file.endsWith("Factory.mjs")) {
-			const counterpart = stripSuffix(
-				javascript_file, "Factory.mjs"
-			) + ".mjs"
+		let canonical_path = javascript_file
 
-			if (functions.includes(counterpart)) {
-				warnDuplicateFunction(javascript_file, counterpart)
-
-				duplicate_functions[counterpart] = true
-			} else {
-				functions.push(counterpart)
-			}
+		if (canonical_path.endsWith("Factory.mjs")) {
+			canonical_path = stripSuffix(canonical_path, "Factory.mjs")
 		} else {
-			functions.push(javascript_file)
+			canonical_path = stripSuffix(canonical_path, ".mjs")
+		}
+
+		// if both function and factory are specified
+		// index will contain canonical_path
+		if (!(canonical_path in index)) {
+			entries.push({
+				canonical_path,
+				canonical_name: convertFilePathToExportName(canonical_path)
+			})
+
+			// save index to disable autogeneration
+			// (because both function and factory exist already)
+			index[canonical_path] = entries.length - 1
+		} else {
+			const entry_index = index[canonical_path]
+
+			entries[entry_index].autogen = null
+
+			warnDuplicateFunction(
+				`${canonical_path}.mjs`,
+				`${canonical_path}Factory.mjs`,
+			)
 		}
 	}
 
-	functions = functions.map(fn => {
-		return stripSuffix(fn, ".mjs")
-	})
+	let library = []
 
-	functions = filterReservedNames(functions)
+	for (const entry of entries) {
+		if (entry.autogen === null) {
+			library.push({...entry})
 
-	emitInfo(`I found ${colorize(functions.length, "blue")} library functions: `)
-	emitInfo(``, false)
-
-	for (const fn of functions) {
-		let duplicate_info = ""
-
-		if (`${fn}.mjs` in duplicate_functions) {
-			duplicate_info = colorize(" (⚠️  user defined function and factory)", "yellow")
+			continue
 		}
 
-		emitInfo(`    - ${colorize(fn, "blue")}${duplicate_info}`, false)
+		const factory_path = `${project.root}/src/export/${entry.canonical_path}Factory.mjs`
+
+		const factory_exists = await isRegularFile(factory_path)
+
+		library.push({
+			...entry,
+			autogen: factory_exists ? "function" : "factory"
+		})
 	}
 
-	emitInfo(``, false)
-
-	return functions
+	return filterReservedNames(library)
 }

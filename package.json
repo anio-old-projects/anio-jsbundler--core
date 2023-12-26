@@ -2,7 +2,8 @@
   "name": "@anio-jsbundler/core",
   "version": "0.1.1",
   "exports": {
-    ".": "./src/index.mjs"
+    ".": "./src/index.mjs",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "@anio-jsbundler/utilities": "^0.3.1"

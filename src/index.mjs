@@ -3,6 +3,10 @@ export {
 } from "./getExportedLibraryFunctions.mjs"
 
 export {
+	default as cleanAutoDirectory
+} from "./cleanAutoDirectory.mjs"
+
+export {
 	default as generateModuleLibrary
 } from "./generateModuleLibrary.mjs"
 

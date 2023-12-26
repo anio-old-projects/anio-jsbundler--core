@@ -100,6 +100,7 @@ import wrapFactory from "./wrapFactory.mjs"
 	await fs.writeFile(
 		path.join(project.root, "src", "auto", "wrapFactory.mjs"),
 		`${await getAutoGenerateWarningComment()}
+import {createDefaultContextAsync} from "@anio-jsbundler/runtime"
 /* Just used to give a name to the exported wrapped factories */
 function createNamedAnonymousFunction(name, fn) {
 	let tmp = {

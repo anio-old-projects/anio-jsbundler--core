@@ -56,10 +56,10 @@ function addFunction(fn, generator) {
 
 	let named_exports = [{
 		key: fn_name,
-		value: `${fn_source}`
+		value: `createNamedAnonymousFunction("${fn_name}", ${fn_source})`
 	}, {
 		key: fn_factory_name,
-		value: `wrapFactory("${fn_factory_name}Async", ${fn_factory_source})`
+		value: `wrapFactory("${fn_name}", ${fn_factory_source})`
 	}]
 
 	return ret + codegenerator.namedExports(named_exports, {
@@ -79,7 +79,10 @@ export function getUsedDefaultContext() {
 	return _module_default_context
 }
 
-import wrapFactory from "./wrapFactory.mjs"
+import {
+	default as wrapFactory,
+	createNamedAnonymousFunction
+} from "./wrapFactory.mjs"
 
 `
 	let generator = new IdentifierGenerator()
@@ -102,7 +105,7 @@ import wrapFactory from "./wrapFactory.mjs"
 		`${await getAutoGenerateWarningComment()}
 import {createDefaultContextAsync} from "@anio-jsbundler/runtime"
 /* Just used to give a name to the exported wrapped factories */
-function createNamedAnonymousFunction(name, fn) {
+export function createNamedAnonymousFunction(name, fn) {
 	let tmp = {
 		[\`\${name}\`](...args) {
 			return fn(...args)
@@ -117,7 +120,7 @@ function createNamedAnonymousFunction(name, fn) {
  * If no context was given, a new one will be created.
  */
 export default function(fn_name, factory) {
-	return createNamedAnonymousFunction(fn_name, async (plugs = {}, new_context = null) => {
+	return createNamedAnonymousFunction(\`\${fn_name}FactoryAsync\`, async (plugs = {}, new_context = null) => {
 		let context = new_context
 
 		if (context === null) {
@@ -131,7 +134,10 @@ export default function(fn_name, factory) {
 			}
 		}
 
-		return factory(context)
+		const fn = factory(context)
+
+		// make sure function is named correctly
+		return createNamedAnonymousFunction(fn_name, fn)
 	})
 }
 `

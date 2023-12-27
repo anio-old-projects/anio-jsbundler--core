@@ -104,7 +104,8 @@ import {
 		path.join(project.root, "src", "auto", "wrapFactory.mjs"),
 		`${await getAutoGenerateWarningComment()}
 import {createDefaultContextAsync} from "@anio-jsbundler/runtime"
-/* Just used to give a name to the exported wrapped factories */
+
+/* Used to give a consistent name to the exported functions and wrapped factories */
 export function createNamedAnonymousFunction(name, fn) {
 	let tmp = {
 		[\`\${name}\`](...args) {
@@ -136,7 +137,7 @@ export default function(fn_name, factory) {
 
 		const fn = factory(context)
 
-		// make sure function is named correctly
+		// make sure created function is named correctly
 		return createNamedAnonymousFunction(fn_name, fn)
 	})
 }

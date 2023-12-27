@@ -19,4 +19,6 @@ export default async function() {
 
 	str += `/* Warning: this file was automatically created by @anio-jsbundler/core v${pkg.version} */\n`
 	str += `/* You should add this file to source control */\n`
+
+	return str
 }

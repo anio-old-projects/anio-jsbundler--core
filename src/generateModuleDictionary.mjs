@@ -3,9 +3,13 @@ import path from "node:path"
 import getAutoGenerateWarningComment from "./util/getAutoGenerateWarningComment.mjs"
 
 import {
-	IdentifierGenerator,
-	codegenerator
+	IdentifierGenerator
 } from "@anio-jsbundler/utilities"
+
+import {
+	groupedImport,
+	defaultExportObject
+} from "@anio-jsbundler/utilities/codegenerator"
 
 export default async function(project, library_functions) {
 	let src = await getAutoGenerateWarningComment()
@@ -37,12 +41,12 @@ export default async function(project, library_functions) {
 	}
 
 	src += "\n"
-	src += codegenerator.groupedImport("./library.mjs", grouped_import, {
+	src += groupedImport("./library.mjs", grouped_import, {
 		additional_padding: 5
 	})
 
 	src += "\n\n"
-	src += codegenerator.defaultExportObject(default_export)
+	src += defaultExportObject(default_export)
 	src += "\n"
 
 	await fs.writeFile(

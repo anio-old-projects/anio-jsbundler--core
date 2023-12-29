@@ -3,9 +3,12 @@ import fs from "node:fs/promises"
 import getAutoGenerateWarningComment from "./util/getAutoGenerateWarningComment.mjs"
 
 import {
-	IdentifierGenerator,
-	codegenerator
+	IdentifierGenerator
 } from "@anio-jsbundler/utilities"
+
+import {
+	namedExports
+} from "@anio-jsbundler/utilities/codegenerator"
 
 function importStatement(alias, path){
 	return `import ${alias} from ${JSON.stringify(path)}\n`
@@ -62,7 +65,7 @@ function addFunction(fn, generator) {
 		value: `wrapFactory("${fn_name}", ${fn_factory_source})`
 	}]
 
-	return ret + codegenerator.namedExports(named_exports, {
+	return ret + namedExports(named_exports, {
 		pad_to_longest_key: false
 	})
 }

@@ -3,9 +3,13 @@ import fs from "node:fs/promises"
 import getAutoGenerateWarningComment from "./util/getAutoGenerateWarningComment.mjs"
 
 import {
-	IdentifierGenerator,
-	codegenerator
+	IdentifierGenerator
 } from "@anio-jsbundler/utilities"
+
+import {
+	objectLiteral,
+	groupedImport
+} from "@anio-jsbundler/utilities/codegenerator"
 
 export default async function(project, library_functions) {
 	let src = await getAutoGenerateWarningComment()
@@ -41,12 +45,12 @@ export default async function(project, library_functions) {
 		})
 	}
 
-	let lib = codegenerator.objectLiteral(library_literal, {
+	let lib = objectLiteral(library_literal, {
 		pre_padding: 8,
 		additional_padding: 6
 	})
 
-	let dict = codegenerator.objectLiteral(library_literal2, {
+	let dict = objectLiteral(library_literal2, {
 		pre_padding: 8
 	})
 
@@ -54,7 +58,7 @@ export default async function(project, library_functions) {
 
 	src += `import {createDefaultContextAsync} from "@anio-jsbundler/runtime"\n`
 
-	src += codegenerator.groupedImport("./library.mjs", grouped_import, {
+	src += groupedImport("./library.mjs", grouped_import, {
 		additional_padding: 9
 	})
 

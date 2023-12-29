@@ -3,9 +3,14 @@ import fs from "node:fs/promises"
 import getAutoGenerateWarningComment from "./util/getAutoGenerateWarningComment.mjs"
 
 import {
-	IdentifierGenerator,
-	codegenerator
+	IdentifierGenerator
 } from "@anio-jsbundler/utilities"
+
+import {
+	groupedImport,
+	namedExports,
+	defaultExportObject
+} from "@anio-jsbundler/utilities/codegenerator"
 
 export default async function(project, library_functions) {
 	const generator = new IdentifierGenerator()
@@ -55,18 +60,18 @@ export default async function(project, library_functions) {
 	}
 
 	src += "\n"
-	src += codegenerator.groupedImport("./library.mjs", grouped_import, {
+	src += groupedImport("./library.mjs", grouped_import, {
 		additional_padding: 8
 	})
 
 	src += `\n`
 	src += `\n`
 
-	src += codegenerator.namedExports(named_exports)
+	src += namedExports(named_exports)
 
 	src += `\n`
 
-	src += codegenerator.defaultExportObject(default_export, {
+	src += defaultExportObject(default_export, {
 		additional_padding: 9
 	})
 

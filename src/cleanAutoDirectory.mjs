@@ -5,42 +5,46 @@ import {
 	emitInfo,
 	emitWarning,
 	colorize,
-	isRegularDirectory
+	EmojiMessageGenerator
 } from "@anio-jsbundler/utilities"
 
-export default async function(project) {
-	// todo: consult project.config.type for project type
-	const overwrite_if_exists = [
-		"dict.mjs",
-		"importWithContextAsync.mjs",
-		"index.mjs",
-		"library.mjs",
-		"wrapFactory.mjs"
-	]
+import {
+	isRegularDirectorySync,
+	removeDirectorySync
+} from "@anio-jsbundler/utilities/fs"
+
+export default async function(options, project, task) {
+	const willAutoGenerateFile = (file_name) => {
+		return task.files_to_generate.map(x => {
+			return x.file
+		}).includes(file_name)
+	}
 
 	const entries = await fs.readdir(
 		path.resolve(project.root, "src", "auto")
 	)
 
-	let n_wiped = 0
+	let trash = new EmojiMessageGenerator("trash")
+	let scrub = new EmojiMessageGenerator("soap")
 
 	for (const entry of entries) {
 		const absolute_path = path.resolve(
 			project.root, "src", "auto", entry
 		)
 
-		if (overwrite_if_exists.includes(entry)) {
-			n_wiped++
+		if (!willAutoGenerateFile(entry)) {
+			trash.emit("remove %", entry)
+			//emitInfo(`  remove ${colorize(`src/auto/${entry}`, "blue")}`, false)
 
-			await fs.writeFile(absolute_path, "/* If this comment is visible an error occurred during bundling */\n")
-		} else if (await isRegularDirectory(absolute_path)) {
-			emitWarning(`src/auto folder may not contain folder ${colorize(entry, "yellow")}`)
+			/*if (isRegularDirectorySync(absolute_path)) {
+				removeDirectorySync(absolute_path)
+			} else {
+				await fs.unlink(absolute_path)
+			}*/
 		} else {
-			emitInfo(`Removing ${colorize(entry, "blue")}`)
+			scrub.emit(`scrub %`, entry)
 
-			await fs.unlink(absolute_path)
+			await fs.writeFile(absolute_path, "aff")
 		}
 	}
-
-	emitInfo(`Truncated ${colorize(n_wiped, "blue")} auto generated files`)
 }
